@@ -14,15 +14,25 @@ class FmpDataCashFlow:
         )
         self.df_cashflow = self._get_cashflow_data()
 
-    def _get_cashflow_data(self):
+    def _get_cashflow_data(self) -> pd.DataFrame | None:
+        """
+        Loads cash flow statement data from a JSON file for the given ticker.
+
+        The data is expected to be in descending order by date and is
+        then reversed to be in ascending order (oldest to newest) and
+        the index is reset.
+
+        Returns:
+            pd.DataFrame | None: A DataFrame containing the cash flow data,
+                                 or None if the file does not exist or is empty.
+        """
         if os.path.exists(self.json_file_cashflow):
-            # the rows are ordered in descending order of
             self.df_cashflow = pd.read_json(self.json_file_cashflow)
             if self.df_cashflow.empty:
                 print(f"Warning: Cash flow data for {self.ticker} is empty.")
                 return None
-            # reverse order of rows, reset index
-            self.df_cashflow = self.df_cashflow.iloc[::-1].reset_index()
+            # reverse order of rows to be chronological (oldest to newest), reset index
+            self.df_cashflow = self.df_cashflow.iloc[::-1].reset_index(drop=True)
             return self.df_cashflow
         else:
             print(f"Error: data for ticker {self.ticker} not found. Implement fmp API")
