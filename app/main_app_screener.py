@@ -1,16 +1,16 @@
 import streamlit as st
 import os
-import pandas as pd
+
 
 from src.fmp.fmp_config import FMP_DATA_DIR
-#from src.fmp.fmp_global_vars import GlobalVars as gv
 from src.main import process_tickers
 from src.config_screener import BLACK_LIST, SCREENER_PARAMS
+import src.global_variables as gv
 
 st.set_page_config(
     page_title="Stock Screener",
-    layout="wide",  # Can be "wide" or "centered"
-    initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
+    layout="wide",
+    initial_sidebar_state="auto",
 )
 
 st.title("Magic Screener")
@@ -23,6 +23,34 @@ available_tickers.sort()
 tab1, tab2 = st.tabs(["Screener", "Compare"])
 
 with tab1:
+    col_fcf, col_ocf, _ = st.columns([0.1, 0.1, 0.8])
+    with col_fcf:
+        fcf_years = st.number_input(
+            label="Years for FCF growth:",
+            min_value=1,
+            max_value=4,
+            value=3,
+            step=1,
+            help="Number of years to calculate Free Cash Flow (FCF) growth.",
+            key="fcf_years_input"
+        )
+    with col_ocf:
+        ocf_years = st.number_input(
+            label="Years for OCF growth:",
+            min_value=1,
+            max_value=4,
+            value=3,
+            step=1,
+            help="Number of years to calculate Operating Cash Flow (OCF) growth.",
+            key="ocf_years_input"
+        )
+
+    # Create an object (dictionary) to pass parameters
+    screener_parameters = {
+        gv.FCF_YEARS: fcf_years,
+        gv.OCF_YEARS: ocf_years,
+    }
+
     selected_tickers = st.multiselect(
         label="Select stock tickers:",
         options=available_tickers,
@@ -30,10 +58,6 @@ with tab1:
         help="Start typing to filter the list of available stock tickers.",
     )
     col1, _ = st.columns([1, 2])
-    with col1:
-        with st.expander("View Screener Parameters"):
-            params_df = pd.DataFrame(SCREENER_PARAMS.items(), columns=["Parameter", "Value"])
-            st.dataframe(params_df, width='stretch', hide_index=True)
 
     st.markdown(
         f"<p style='font-size: 18px; color: #2ECC71;'>Available stocks: {len(available_tickers)}</p>",
@@ -45,7 +69,7 @@ with tab1:
 
     st.write("---")
 
-    df_scores, df_features = process_tickers(selected_tickers)
+    df_scores, df_features = process_tickers(selected_tickers, screener_parameters)
     if not df_scores.empty:
         st.dataframe(df_scores)
     else:
