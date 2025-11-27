@@ -78,6 +78,22 @@ with tab1:
 
     df_scores, df_features = process_tickers(selected_tickers, screener_parameters)
     if not df_scores.empty:
+        st.markdown(
+            f"<p style='font-size: 18px; color: #2ECC71;'>Screener Results (Scores) Distribution</p>",
+            unsafe_allow_html=True,
+        )
+        score_counts = df_scores[gv.SCORE].value_counts().reset_index()
+        score_counts.columns = [gv.SCORE, 'Occurrences']
+        score_counts = score_counts.sort_values(by=gv.SCORE)
+
+        col_chart, _ = st.columns([0.5, 0.5]) # Half width for the chart
+        with col_chart:
+            st.bar_chart(score_counts, x=gv.SCORE, y='Occurrences', height=250) # Reduced height
+
+        st.markdown(
+            f"<p style='font-size: 18px; color: #2ECC71;'>Screener Results</p>",
+            unsafe_allow_html=True,
+        )
         st.dataframe(df_scores)
     else:
         st.info(
@@ -85,4 +101,5 @@ with tab1:
         )
     st.write("---")
     if not df_features.empty:
+        st.subheader("Detailed Features Data")
         st.dataframe(df_features)
