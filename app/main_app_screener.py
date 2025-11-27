@@ -23,6 +23,10 @@ available_tickers.sort()
 tab1, tab2 = st.tabs(["Screener", "Compare"])
 
 with tab1:
+    st.markdown(
+        "<p style='font-size: 18px; color: #2ECC71; '>Screener Parameters</p>",
+        unsafe_allow_html=True
+    )
     col_fcf, col_ocf, _ = st.columns([0.1, 0.1, 0.8])
     with col_fcf:
         fcf_years = st.number_input(
@@ -51,6 +55,10 @@ with tab1:
         gv.OCF_YEARS: ocf_years,
     }
 
+    st.markdown(
+        f"<p style='font-size: 18px; color: #2ECC71;'>Available stocks: {len(available_tickers)}</p>",
+        unsafe_allow_html=True,
+    )
     selected_tickers = st.multiselect(
         label="Select stock tickers:",
         options=available_tickers,
@@ -59,10 +67,7 @@ with tab1:
     )
     col1, _ = st.columns([1, 2])
 
-    st.markdown(
-        f"<p style='font-size: 18px; color: #2ECC71;'>Available stocks: {len(available_tickers)}</p>",
-        unsafe_allow_html=True,
-    )
+
 
     if st.button("Select All"):
         selected_tickers = available_tickers

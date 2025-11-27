@@ -27,7 +27,8 @@ def process_tickers(
         return pd.DataFrame(), pd.DataFrame()
 
     # process Cash Flow Data
-    df_scores, df_features = FmpDataCashFlow.collect_scores_and_features(tickers_list=tickers)
+    df_scores, df_features = FmpDataCashFlow.collect_scores_and_features(tickers_list=tickers,
+                                                                         screener_params=screener_parameters)
     # add scores to both dfs
     df_scores = calculate_score(df_scores)
     df_features['score'] = df_scores['score']
@@ -49,9 +50,13 @@ def process_tickers(
 
 
 if __name__ == "__main__":
-
+    SCREENER_PARAMS = {
+        "fcf_years" : 3,
+        "ocf_years" : 2
+    }
     test_tickers = ["AACG", "TEST", "AAL"]
-    df_scores_test, df_features_test = process_tickers(test_tickers)
+    df_scores_test, df_features_test = process_tickers(test_tickers,
+                                                       screener_parameters=SCREENER_PARAMS)
 
     print(df_features_test)
     print(df_scores_test)

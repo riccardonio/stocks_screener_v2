@@ -3,7 +3,8 @@ import pandas as pd
 from typing import List
 
 from src.fmp.fmp_config import FMP_DATA_DIR
-from src.fmp.fmp_global_variables import GlobalVars as gv
+from src.fmp.fmp_global_variables import GlobalVars as fmp_gv
+import src.global_variables as gv
 
 
 class FmpDataCashFlow:
@@ -44,10 +45,10 @@ class FmpDataCashFlow:
         and if the most recent cash flow value is positive.
         """
         fcf_labels = [
-            gv.fcf_4_year_ago,
-            gv.fcf_3_year_ago,
-            gv.fcf_2_year_ago,
-            gv.fcf_1_year_ago,
+            fmp_gv.fcf_4_year_ago,
+            fmp_gv.fcf_3_year_ago,
+            fmp_gv.fcf_2_year_ago,
+            fmp_gv.fcf_1_year_ago,
         ]
         if self.df_cashflow is None or self.df_cashflow.empty:
             return False
@@ -57,7 +58,7 @@ class FmpDataCashFlow:
         if len(self.df_cashflow) < n:
             return False
 
-        recent_cashflow_values = self.df_cashflow[gv.freeCashFlow].iloc[-n:]
+        recent_cashflow_values = self.df_cashflow[fmp_gv.freeCashFlow].iloc[-n:]
 
         selected_labels = fcf_labels[-n:]
         cashflow_dict = dict(zip(selected_labels, recent_cashflow_values.tolist()))
@@ -80,10 +81,10 @@ class FmpDataCashFlow:
         and if the most recent cash flow value is positive.
         """
         ocf_labels = [
-            gv.ocf_4_year_ago,
-            gv.ocf_3_year_ago,
-            gv.ocf_2_year_ago,
-            gv.ocf_1_year_ago,
+            fmp_gv.ocf_4_year_ago,
+            fmp_gv.ocf_3_year_ago,
+            fmp_gv.ocf_2_year_ago,
+            fmp_gv.ocf_1_year_ago,
         ]
         if self.df_cashflow is None or self.df_cashflow.empty:
             return False
@@ -93,7 +94,7 @@ class FmpDataCashFlow:
         if len(self.df_cashflow) < n:
             return False
 
-        recent_cashflow_values = self.df_cashflow[gv.operative_cash_flow].iloc[-n:]
+        recent_cashflow_values = self.df_cashflow[fmp_gv.operative_cash_flow].iloc[-n:]
 
         selected_labels = ocf_labels[-n:]
         cashflow_dict = dict(zip(selected_labels, recent_cashflow_values.tolist()))
@@ -110,58 +111,61 @@ class FmpDataCashFlow:
         return cashflow_trend_criterium, cashflow_dict
 
     @classmethod
-    def collect_scores_and_features(cls, tickers_list: List[str]):
-            """
-            Collects Free Cash Flow (FCF) and Operative Cash Flow (OCF) features and scores
-            indicating if they are increasing for a list of tickers.
-            Args:
-                tickers_list (List[str]): A list of ticker symbols to process.
+    def collect_scores_and_features(cls, tickers_list: List[str],
+                                    screener_params: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Collects Free Cash Flow (FCF) and Operative Cash Flow (OCF) features and scores
+        indicating if they are increasing for a list of tickers.
+        Args:
+            tickers_list (List[str): A list of ticker symbols to process.
 
-            Returns:
-                Tuple[pd.DataFrame, pd.DataFrame]: A tuple containing two DataFrames:
-                    - df_scores: Contains boolean scores indicating if FCF and OCF are continually
-                      increasing and positive for each ticker.
-                    - df_features: Contains FCF and OCF data for the past 'n' years for each ticker.
-            """
-            all_ticker_features = []
-            all_ticker_scores = []
-            for t in tickers_list:
-                try:
-                    cashflow = cls(ticker=t)
-                    # Retrieve FCF data and score
-                    is_fcf_increasing, fcf_data = cashflow.is_free_cashflow_increasing(n=3)
-                    # Retrieve OCF data and score
-                    is_ocf_increasing, ocf_data = cashflow.is_operative_cashflow_increasing(n=3)
+        Returns:
+            tuple[pd.DataFrame, pd.DataFrame]: A tuple containing two DataFrames:
+                - df_scores: Contains boolean scores indicating if FCF and OCF are continually
+                  increasing and positive for each ticker.
+                - df_features: Contains FCF and OCF data for the past 'n' years for each ticker.
+                :param screener_params: dictionary with screener params
+        """
+        all_ticker_features = []
+        all_ticker_scores = []
+        for t in tickers_list:
+            try:
+                cashflow = cls(ticker=t)
+                # Retrieve FCF data and score
+                years_fcf = screener_params.get(gv.FCF_YEARS, 3)
+                is_fcf_increasing, fcf_data = cashflow.is_free_cashflow_increasing(n=years_fcf)
+                # Retrieve OCF data and score
+                years_ocf = screener_params.get(gv.OCF_YEARS, 3)
+                is_ocf_increasing, ocf_data = cashflow.is_operative_cashflow_increasing(n=years_ocf)
 
-                    row_data_features = {'ticker': t}
-                    row_data_features.update(fcf_data)
-                    row_data_features.update(ocf_data)
-                    all_ticker_features.append(row_data_features)
+                row_data_features = {'ticker': t}
+                row_data_features.update(fcf_data)
+                row_data_features.update(ocf_data)
+                all_ticker_features.append(row_data_features)
 
-                    row_data_scores = {
-                        'ticker': t,
-                        gv.increasing_fcf_condition: is_fcf_increasing,
-                        gv.increasing_ocf_condition: is_ocf_increasing, # Add OCF score
-                    }
-                    all_ticker_scores.append(row_data_scores)
+                row_data_scores = {
+                    'ticker': t,
+                    fmp_gv.increasing_fcf_condition: is_fcf_increasing,
+                    fmp_gv.increasing_ocf_condition: is_ocf_increasing, # Add OCF score
+                }
+                all_ticker_scores.append(row_data_scores)
 
-                except Exception as e:
-                    print(f"Error processing ticker {t}: {e}")
+            except Exception as e:
+                print(f"Error processing ticker {t}: {e}")
 
-            if all_ticker_features:
-                df_features = pd.DataFrame(all_ticker_features)
-            else:
-                print("No valid feature data collected for any ticker.")
-                df_features = pd.DataFrame()
+        if all_ticker_features:
+            df_features = pd.DataFrame(all_ticker_features)
+        else:
+            print("No valid feature data collected for any ticker.")
+            df_features = pd.DataFrame()
 
-            if all_ticker_scores:
-                df_scores = pd.DataFrame(all_ticker_scores)
-            else:
-                print("No valid score data collected for any ticker.")
-                df_scores = pd.DataFrame()
+        if all_ticker_scores:
+            df_scores = pd.DataFrame(all_ticker_scores)
+        else:
+            print("No valid score data collected for any ticker.")
+            df_scores = pd.DataFrame()
 
-            return df_scores, df_features
-
+        return df_scores, df_features
 
 if __name__ == "__main__":
     cashflow = FmpDataCashFlow("TEST")
