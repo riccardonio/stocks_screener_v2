@@ -59,18 +59,20 @@ with tab1:
         f"<p style='font-size: 18px; color: #2ECC71;'>Available stocks: {len(available_tickers)}</p>",
         unsafe_allow_html=True,
     )
-    selected_tickers = st.multiselect(
-        label="Select stock tickers:",
-        options=available_tickers,
-        placeholder="Type or select tickers...",
-        help="Start typing to filter the list of available stock tickers.",
-    )
-    col1, _ = st.columns([1, 2])
+    col_multiselect, col_select_all = st.columns([1, 3])
+    with col_multiselect:
+        selected_tickers = st.multiselect(
+            label="Select stock tickers:",
+            options=available_tickers,
+            placeholder="Type or select tickers...",
+            help="Start typing to filter the list of available stock tickers.",
+        )
 
-
-
-    if st.button("Select All"):
-        selected_tickers = available_tickers
+    with col_select_all:
+        # Add a div with flex-grow to push the button to the bottom of its column
+        st.markdown('<div style="flex-grow: 1;"></div>', unsafe_allow_html=True)
+        if st.button("Select All"):
+            selected_tickers = available_tickers
 
     st.write("---")
 
