@@ -1,7 +1,8 @@
 import pandas as pd
 
 from src.finviz.finviz_screener import get_df_with_all_tickers_information
-
+import src.global_variables as gv
+from src.yfinance.yfinance_utils import YahooFinanceTickerInfo
 
 def reorder_dataframes_columns(df_scores: pd.DataFrame,
                                df_features: pd.DataFrame,
@@ -56,11 +57,32 @@ def add_ticker_info(df_scores, df_features):
 
 def calculate_score(df_scores: pd.DataFrame) -> pd.DataFrame:
     score_columns = df_scores.select_dtypes(include='bool').columns
-    df_scores['score'] = df_scores[score_columns].sum(axis=1)
+    df_scores[gv.SCORE] = df_scores[score_columns].sum(axis=1)
 
     # Reorder columns: 'score' should come before boolean columns
     non_score_and_bool_cols = [col for col in df_scores.columns if col not in score_columns and col != 'score']
-    new_order = non_score_and_bool_cols + ['score'] + score_columns.tolist()
+    new_order = non_score_and_bool_cols + [gv.SCORE] + score_columns.tolist()
     df_scores = df_scores[new_order]
 
     return df_scores
+
+
+def add_ticker_current_info(df_scores: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adds multiple metrics (P/E, Insider Ownership, FCF, etc.) to the DataFrame
+    by fetching data for each ticker efficiently.
+    """
+    # 1. Create the Analyzer object for each row
+    # This triggers the API call ONCE per ticker
+    stock_objects = df_scores['ticker'].apply(YahooFinanceTickerInfo)
+
+    # 2. Extract all metrics at once into a new DataFrame
+    # apply(pd.Series) expands the dictionary returned by get_all_metrics into columns
+    metrics_df = stock_objects.apply(lambda x: pd.Series(x.get_all_metrics()))
+
+    # 3. Concatenate the new metrics columns with the original DataFrame
+    # axis=1 adds columns side-by-side
+    df_scores = pd.concat([df_scores, metrics_df], axis=1)
+
+    return df_scores
+

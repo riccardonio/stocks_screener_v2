@@ -14,3 +14,8 @@ OCF_YEARS = "ocf_years"
 
 # GENERAL
 SCORE = "score"
+P_E_RATIO = "P_E_ratio"
+INSIDER_OWNERSHIP = "insider_ownership"
+FREE_CASHFLOW = "Free Cash Flow"
+MARKET_CAP = "Market Cap"
+ENTERPRISE_TO_EBITDA = "EV/EBITDA"

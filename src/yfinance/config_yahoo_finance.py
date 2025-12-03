@@ -1,0 +1,6 @@
+trailingPE = "trailingPE"
+forwardPE = "forwardPE"
+heldPercentInsiders = "heldPercentInsiders"
+marketCap = "marketCap"
+freeCashflow = "freeCashflow"
+enterpriseToEbitda = "enterpriseToEbitda"
