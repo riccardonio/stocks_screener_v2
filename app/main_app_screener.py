@@ -53,12 +53,23 @@ with tab1:
                 key="ocf_years_input"
             )
         with col_dl:
-            st.write("")  # Vertical spacer to align with number inputs
-            st.write("")
-            current_data_dl = st.toggle(
-                label="download current data",
-                key="current_data_dl_toggle"
-            )
+            sub_col_score, sub_col_toggle = st.columns([1, 2])
+            with sub_col_score:
+                min_score = st.number_input(
+                    label="Min Score:",
+                    min_value=0,
+                    value=0,
+                    step=1,
+                    help="Minimum score to filter stocks.",
+                    key="min_score_input"
+                )
+            with sub_col_toggle:
+                st.write("")  # Vertical spacer to align with number inputs
+                st.write("")
+                current_data_dl = st.toggle(
+                    label="download current data",
+                    key="current_data_dl_toggle"
+                )
 
         # Create an object (dictionary) to pass parameters
         screener_parameters = {
@@ -86,6 +97,10 @@ with tab1:
                 selected_tickers = available_tickers
 
     df_scores, df_features = process_tickers(selected_tickers, screener_parameters)
+
+    # Filter by score
+    if not df_scores.empty:
+        df_scores = df_scores[df_scores[gv.SCORE] >= min_score]
 
     with col_chart:
         if not df_scores.empty:

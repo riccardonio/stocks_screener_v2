@@ -46,6 +46,9 @@ def process_tickers(
         if col not in [gv.SCORE]:
             df_features[col] = df_features[col].apply(lambda x: nm.numerize(x) if pd.notnull(x) else x)
 
+    if gv.MARKET_CAP in df_scores.columns:
+        df_scores[gv.MARKET_CAP] = df_scores[gv.MARKET_CAP].apply(lambda x: nm.numerize(x) if pd.notnull(x) else x)
+
     return df_scores, df_features
 
 

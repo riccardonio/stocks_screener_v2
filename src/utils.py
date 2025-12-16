@@ -1,4 +1,5 @@
 import pandas as pd
+import numerize.numerize as nm
 
 from src.finviz.finviz_screener import get_df_with_all_tickers_information
 import src.global_variables as gv
@@ -72,17 +73,15 @@ def add_ticker_current_info(df_scores: pd.DataFrame) -> pd.DataFrame:
     Adds multiple metrics (P/E, Insider Ownership, FCF, etc.) to the DataFrame
     by fetching data for each ticker efficiently.
     """
-    # 1. Create the Analyzer object for each row
-    # This triggers the API call ONCE per ticker
+
     stock_objects = df_scores['ticker'].apply(YahooFinanceTickerInfo)
 
-    # 2. Extract all metrics at once into a new DataFrame
-    # apply(pd.Series) expands the dictionary returned by get_all_metrics into columns
     metrics_df = stock_objects.apply(lambda x: pd.Series(x.get_all_metrics()))
 
-    # 3. Concatenate the new metrics columns with the original DataFrame
-    # axis=1 adds columns side-by-side
     df_scores = pd.concat([df_scores, metrics_df], axis=1)
+
+    if gv.MARKET_CAP in df_scores.columns:
+        df_scores[gv.MARKET_CAP] = df_scores[gv.MARKET_CAP].apply(lambda x: nm.numerize(x) if pd.notnull(x) else x)
 
     return df_scores
 
