@@ -107,5 +107,5 @@ class YahooFinanceTickerInfo:
         }
 
 if __name__ == "__main__":
-    all_metrics = YahooFinanceTickerInfo("GAMB").get_all_metrics()
+    all_metrics = YahooFinanceTickerInfo("CHTR").get_all_metrics()
     print(all_metrics)

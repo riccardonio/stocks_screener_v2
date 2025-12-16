@@ -31,7 +31,7 @@ with tab1:
             unsafe_allow_html=True
         )
 
-        col_fcf, col_ocf = st.columns(2)
+        col_fcf, col_ocf, col_dl = st.columns(3)
         with col_fcf:
             fcf_years = st.number_input(
                 label="Years FCF growth:",
@@ -51,6 +51,13 @@ with tab1:
                 step=1,
                 help="Number of years to calculate Operating Cash Flow (OCF) growth.",
                 key="ocf_years_input"
+            )
+        with col_dl:
+            st.write("")  # Vertical spacer to align with number inputs
+            st.write("")
+            current_data_dl = st.toggle(
+                label="download current data",
+                key="current_data_dl_toggle"
             )
 
         # Create an object (dictionary) to pass parameters
@@ -103,7 +110,10 @@ with tab1:
             f"<p style='font-size: 18px; color: #2ECC71;'>Screener Results</p>",
             unsafe_allow_html=True,
         )
-        df_scores = add_ticker_current_info(df_scores)
+        print("checking if current data should be added")
+        if current_data_dl:
+            print("Adding current data to screener results")
+            df_scores = add_ticker_current_info(df_scores)
         st.dataframe(df_scores, width='stretch')
     else:
         st.info(
@@ -114,3 +124,7 @@ with tab1:
     if not df_features.empty:
         st.subheader("Detailed Features Data")
         st.dataframe(df_features, width='stretch')
+    else:
+        st.info(
+            "No data to display for Detailed Features Data. Please select and process tickers."
+        )
