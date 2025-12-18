@@ -96,6 +96,23 @@ with tab1:
             if st.button("Select All"):
                 selected_tickers = available_tickers
 
+        # --- Blacklist Section ---
+        from src.utils import load_tickers_blacklist
+        blacklist_data = load_tickers_blacklist()
+        if blacklist_data:
+            st.write("---")
+            st.markdown(
+                "<p style='font-size: 18px; color: #E74C3C; '>Tickers Blacklist</p>",
+                unsafe_allow_html=True
+            )
+            col_bl_info, col_bl_tickers = st.columns([1, 2])
+            with col_bl_info:
+                st.write(f"**Date:** {blacklist_data.get('date', 'N/A')}")
+                st.write(f"**Threshold:** {blacklist_data.get('threshold_score', 'N/A')}")
+            with col_bl_tickers:
+                st.write(f"**Tickers:** {', '.join(blacklist_data.get('tickers', []))}")
+        # -------------------------
+
     df_scores, df_features = process_tickers(selected_tickers, screener_parameters)
 
     # Filter by score

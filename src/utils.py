@@ -1,5 +1,8 @@
 import pandas as pd
 import numerize.numerize as nm
+import json
+import os
+from datetime import datetime
 
 from src.finviz.finviz_screener import get_df_with_all_tickers_information
 import src.global_variables as gv
@@ -94,4 +97,55 @@ def add_ticker_current_info(df_scores: pd.DataFrame, progress_callback=None) -> 
         df_scores[gv.MARKET_CAP] = df_scores[gv.MARKET_CAP].apply(lambda x: nm.numerize(x) if pd.notnull(x) else x)
 
     return df_scores
+
+
+def save_tickers_blacklist(df_score: pd.DataFrame, threshold: float):
+    """
+    Saves tickers from df_score that have a score less than the threshold
+    to a JSON file called data/tickers_blacklist.json.
+    """
+    if 'ticker' not in df_score.columns or gv.SCORE not in df_score.columns:
+        print(f"Warning: 'ticker' or '{gv.SCORE}' column missing from DataFrame.")
+        return
+
+    # Filter tickers with score < threshold
+    blacklisted_df = df_score[df_score[gv.SCORE] < threshold]
+    blacklisted_tickers = blacklisted_df['ticker'].tolist()
+
+    # Prepare data for JSON
+    output_data = {
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "threshold_score": threshold,
+        "tickers": blacklisted_tickers
+    }
+
+    # Ensure data directory exists
+    os.makedirs(gv.DATA_DIR, exist_ok=True)
+    file_path = os.path.join(gv.DATA_DIR, "tickers_blacklist.json")
+
+    # Save to JSON
+    with open(file_path, "w") as f:
+        json.dump(output_data, f, indent=4)
+        
+    print(f"Blacklist saved to {file_path}. Total tickers: {len(blacklisted_tickers)}")
+
+
+def load_tickers_blacklist() -> dict:
+    """
+    Loads blacklisted tickers from data/tickers_blacklist.json.
+
+    Returns:
+        dict: The blacklist data dictionary. Returns an empty dict if the file doesn't exist.
+    """
+    file_path = os.path.join(gv.DATA_DIR, "tickers_blacklist.json")
+
+    if not os.path.exists(file_path):
+        return {}
+
+    try:
+        with open(file_path, "r") as f:
+            data = json.load(f)
+            return data
+    except (json.JSONDecodeError, FileNotFoundError):
+        return {}
 
