@@ -68,16 +68,26 @@ def calculate_score(df_scores: pd.DataFrame) -> pd.DataFrame:
     return df_scores
 
 
-def add_ticker_current_info(df_scores: pd.DataFrame) -> pd.DataFrame:
+def add_ticker_current_info(df_scores: pd.DataFrame, progress_callback=None) -> pd.DataFrame:
     """
     Adds multiple metrics (P/E, Insider Ownership, FCF, etc.) to the DataFrame
     by fetching data for each ticker efficiently.
     """
+    metrics_list = []
+    tickers = df_scores['ticker'].tolist()
+    total_tickers = len(tickers)
 
-    stock_objects = df_scores['ticker'].apply(YahooFinanceTickerInfo)
+    for i, ticker in enumerate(tickers):
+        stock_obj = YahooFinanceTickerInfo(ticker)
+        metrics_list.append(stock_obj.get_all_metrics())
+        
+        if progress_callback:
+            progress_callback((i + 1) / total_tickers)
 
-    metrics_df = stock_objects.apply(lambda x: pd.Series(x.get_all_metrics()))
+    metrics_df = pd.DataFrame(metrics_list)
 
+    metrics_df.index = df_scores.index
+    
     df_scores = pd.concat([df_scores, metrics_df], axis=1)
 
     if gv.MARKET_CAP in df_scores.columns:

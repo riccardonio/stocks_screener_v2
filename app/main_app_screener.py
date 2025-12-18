@@ -128,7 +128,13 @@ with tab1:
         print("checking if current data should be added")
         if current_data_dl:
             print("Adding current data to screener results")
-            df_scores = add_ticker_current_info(df_scores)
+            progress_bar = st.progress(0, text="Fetching current data...")
+            
+            def update_progress(progress):
+                progress_bar.progress(progress, text=f"Fetching current data... {int(progress * 100)}%")
+                
+            df_scores = add_ticker_current_info(df_scores, progress_callback=update_progress)
+            progress_bar.empty()
         st.dataframe(df_scores, width='stretch')
     else:
         st.info(
