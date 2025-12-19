@@ -19,15 +19,113 @@ st.set_page_config(
 
 st.markdown(
     """
-        <style>
-               .block-container {
-                    padding-top: 1rem;
-                    padding-bottom: 0rem;
-                    padding-left: 5rem;
-                    padding-right: 5rem;
-                }
-        </style>
-        """,
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        html, body, [class*="css"] {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .block-container {
+            padding-top: 1.5rem;
+            padding-bottom: 2rem;
+            padding-left: 4rem;
+            padding-right: 4rem;
+            max-width: 1400px;
+        }
+
+        /* Titles and Headers */
+        h1 {
+            color: #FFFFFF;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 2rem !important;
+        }
+
+        .section-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #10B981; /* Emerald Green */
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Sidebar Styling */
+        [data-testid="stSidebar"] {
+            background-color: #0F172A; /* Deep Slate */
+            border-right: 1px solid #1E293B;
+        }
+        
+        [data-testid="stSidebar"] .stMarkdown p {
+            font-weight: 600;
+        }
+
+        /* Card-like Look for Sections */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 2rem;
+            background-color: transparent;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            height: 50px;
+            white-space: pre;
+            background-color: transparent;
+            border-radius: 4px 4px 0px 0px;
+            color: #94A3B8;
+            font-weight: 500;
+        }
+
+        .stTabs [aria-selected="true"] {
+            color: #10B981 !important;
+            border-bottom-color: #10B981 !important;
+        }
+
+        /* Input Styling */
+        .stNumberInput input, .stTextInput input, .stMultiSelect [data-baseweb="select"] {
+            background-color: #1E293B !important;
+            border: 1px solid #334155 !important;
+            border-radius: 8px !important;
+            color: #F8FAFC !important;
+        }
+
+        /* Button Styling */
+        .stButton button {
+            background-color: #1E293B;
+            color: #F8FAFC;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .stButton button:hover {
+            border-color: #10B981;
+            color: #10B981;
+            background-color: #0F172A;
+        }
+
+        /* Metrics/Info Box */
+        .info-box {
+            background-color: #1E293B;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            margin-bottom: 1rem;
+        }
+
+        /* Dividers */
+        hr {
+            margin: 2rem 0;
+            border-color: #334155;
+            opacity: 0.3;
+        }
+
+    </style>
+    """,
     unsafe_allow_html=True,
 )
 
@@ -42,7 +140,7 @@ whitelisted_tickers = [t for t in available_tickers if t not in blacklisted_tick
 
 with st.sidebar:
     st.markdown(
-        "<p style='font-size: 18px; color: #2ECC71; '>Screener Parameters</p>",
+        '<div class="section-header">Screener Parameters</div>',
         unsafe_allow_html=True,
     )
     fcf_years = st.number_input(
@@ -69,7 +167,7 @@ tab1, tab2 = st.tabs(["Screener", "Compare"])
 
 with tab1:
     st.markdown(
-        "<p style='font-size: 18px; color: #2ECC71; '>Select Stocks</p>",
+        '<div class="section-header">Select Stocks</div>',
         unsafe_allow_html=True,
     )
 
@@ -121,12 +219,23 @@ with tab1:
     with st.sidebar:
         if blacklist_data:
             st.markdown(
-                "<p style='font-size: 18px; color: #2ECC71;'>Tickers Blacklist</p>",
+                '<div class="section-header"> Tickers Blacklist</div>',
                 unsafe_allow_html=True,
             )
-            st.write(f"**Date:** {blacklist_data.get('date', 'N/A')}")
-            st.write(f"**Threshold:** {blacklist_data.get('threshold_score', 'N/A')}")
-            st.write(f"**Nr. of Tickers:** {len(blacklisted_tickers)}")
+            with st.container():
+                st.markdown(
+                    f"""
+                    <div class="info-box">
+                        <div style="font-size: 0.85rem; color: #94A3B8;">Date</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem;">{blacklist_data.get('date', 'N/A')}</div>
+                        <div style="font-size: 0.85rem; color: #94A3B8;">Threshold</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem;">{blacklist_data.get('threshold_score', 'N/A')}</div>
+                        <div style="font-size: 0.85rem; color: #94A3B8;">Tickers</div>
+                        <div style="font-weight: 600;">{len(blacklisted_tickers)}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
             bl_threshold = st.number_input(
                 "BL Threshold:",
@@ -157,14 +266,14 @@ with tab1:
     with col_right:
         if not df_scores.empty:
             st.markdown(
-                f"<p style='font-size: 18px; color: #2ECC71;'>Score Distribution</p>",
+                '<div class="section-header">Score Distribution</div>',
                 unsafe_allow_html=True,
             )
             score_counts = df_scores[gv.SCORE].value_counts().reset_index()
             score_counts.columns = [gv.SCORE, "Occurrences"]
             score_counts = score_counts.sort_values(by=gv.SCORE)
 
-            st.bar_chart(score_counts, x=gv.SCORE, y="Occurrences", height=300)
+            st.bar_chart(score_counts, x=gv.SCORE, y="Occurrences", height=200)
         else:
             st.markdown("<br><br>", unsafe_allow_html=True)
             st.info("Select tickers to see score distribution.")
@@ -173,7 +282,7 @@ with tab1:
 
     if not df_scores.empty:
         st.markdown(
-            f"<p style='font-size: 18px; color: #2ECC71;'>Screener Results</p>",
+            '<div class="section-header"> Screener Results</div>',
             unsafe_allow_html=True,
         )
         print("checking if current data should be added")
@@ -198,7 +307,10 @@ with tab1:
 
     st.write("---")
     if not df_features.empty:
-        st.subheader("Detailed Features Data")
+        st.markdown(
+            '<div class="section-header"><span>🔍</span> Detailed Features Data</div>',
+            unsafe_allow_html=True,
+        )
         st.dataframe(df_features, width="stretch")
     else:
         st.info(
