@@ -26,66 +26,64 @@ blacklist_data = load_tickers_blacklist()
 blacklisted_tickers = blacklist_data.get("tickers", [])
 whitelisted_tickers = [t for t in available_tickers if t not in blacklisted_tickers]
 
+with st.sidebar:
+    st.markdown(
+        "<p style='font-size: 18px; color: #2ECC71; '>Screener Parameters</p>",
+        unsafe_allow_html=True,
+    )
+    fcf_years = st.number_input(
+        label="Years FCF growth:",
+        min_value=1,
+        max_value=4,
+        value=3,
+        step=1,
+        help="Number of years to calculate Free Cash Flow (FCF) growth.",
+        key="fcf_years_input",
+    )
+    ocf_years = st.number_input(
+        label="Years OCF growth:",
+        min_value=1,
+        max_value=4,
+        value=3,
+        step=1,
+        help="Number of years to calculate Operating Cash Flow (OCF) growth.",
+        key="ocf_years_input",
+    )
+    st.write("---")
+
 tab1, tab2 = st.tabs(["Screener", "Compare"])
 
 with tab1:
-    col_inputs, col_chart = st.columns([0.6, 0.4], gap="medium")
+    st.markdown(
+        "<p style='font-size: 18px; color: #2ECC71; '>Select Stocks</p>",
+        unsafe_allow_html=True,
+    )
 
-    with col_inputs:
-        st.markdown(
-            "<p style='font-size: 18px; color: #2ECC71; '>Screener Parameters</p>",
-            unsafe_allow_html=True,
-        )
+    col_left, col_right = st.columns([0.6, 0.4], gap="medium")
 
-        col_fcf, col_ocf, col_dl = st.columns(3)
-        with col_fcf:
-            fcf_years = st.number_input(
-                label="Years FCF growth:",
-                min_value=1,
-                max_value=4,
-                value=3,
+    with col_left:
+        col_score, col_toggle = st.columns([1, 2])
+        with col_score:
+            min_score = st.number_input(
+                label="Min Score:",
+                min_value=0,
+                value=0,
                 step=1,
-                help="Number of years to calculate Free Cash Flow (FCF) growth.",
-                key="fcf_years_input",
+                help="Minimum score to filter stocks.",
+                key="min_score_input",
             )
-        with col_ocf:
-            ocf_years = st.number_input(
-                label="Years OCF growth:",
-                min_value=1,
-                max_value=4,
-                value=3,
-                step=1,
-                help="Number of years to calculate Operating Cash Flow (OCF) growth.",
-                key="ocf_years_input",
+        with col_toggle:
+            st.write("")  # Vertical spacer to align with number inputs
+            st.write("")
+            current_data_dl = st.toggle(
+                label="download current data", key="current_data_dl_toggle"
             )
-        with col_dl:
-            sub_col_score, sub_col_toggle = st.columns([1, 2])
-            with sub_col_score:
-                min_score = st.number_input(
-                    label="Min Score:",
-                    min_value=0,
-                    value=0,
-                    step=1,
-                    help="Minimum score to filter stocks.",
-                    key="min_score_input",
-                )
-            with sub_col_toggle:
-                st.write("")  # Vertical spacer to align with number inputs
-                st.write("")
-                current_data_dl = st.toggle(
-                    label="download current data", key="current_data_dl_toggle"
-                )
 
         # Create an object (dictionary) to pass parameters
         screener_parameters = {
             gv.FCF_YEARS: fcf_years,
             gv.OCF_YEARS: ocf_years,
         }
-        st.write("---")
-        st.markdown(
-            f"<p style='font-size: 18px; color: #2ECC71;'>Available stocks: {len(available_tickers)}</p>",
-            unsafe_allow_html=True,
-        )
 
         col_multiselect, col_select_all, col_select_whitelisted = st.columns([3, 1, 1])
         with col_multiselect:
@@ -104,8 +102,6 @@ with tab1:
         with col_select_whitelisted:
             if st.button("Select Whitelisted"):
                 selected_tickers = whitelisted_tickers
-
-        # -------------------------
 
     # --- Blacklist Section in Sidebar ---
     with st.sidebar:
@@ -144,7 +140,7 @@ with tab1:
     if not df_scores.empty:
         df_scores = df_scores[df_scores[gv.SCORE] >= min_score]
 
-    with col_chart:
+    with col_right:
         if not df_scores.empty:
             st.markdown(
                 f"<p style='font-size: 18px; color: #2ECC71;'>Score Distribution</p>",
