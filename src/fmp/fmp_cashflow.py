@@ -74,7 +74,6 @@ class FmpDataCashFlow:
 
         return cashflow_trend_criterium, cashflow_dict
 
-
     def is_operative_cashflow_increasing(self, n: int = 2) -> (bool, dict):
         """
         Checks if the cash flow values for the most recent `n` years are continually increasing,
@@ -111,8 +110,9 @@ class FmpDataCashFlow:
         return cashflow_trend_criterium, cashflow_dict
 
     @classmethod
-    def collect_scores_and_features(cls, tickers_list: List[str],
-                                    screener_params: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def collect_scores_and_features(
+        cls, tickers_list: List[str], screener_params: dict
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Collects Free Cash Flow (FCF) and Operative Cash Flow (OCF) features and scores
         indicating if they are increasing for a list of tickers.
@@ -133,20 +133,24 @@ class FmpDataCashFlow:
                 cashflow = cls(ticker=t)
                 # Retrieve FCF data and score
                 years_fcf = screener_params.get(gv.FCF_YEARS, 3)
-                is_fcf_increasing, fcf_data = cashflow.is_free_cashflow_increasing(n=years_fcf)
+                is_fcf_increasing, fcf_data = cashflow.is_free_cashflow_increasing(
+                    n=years_fcf
+                )
                 # Retrieve OCF data and score
                 years_ocf = screener_params.get(gv.OCF_YEARS, 3)
-                is_ocf_increasing, ocf_data = cashflow.is_operative_cashflow_increasing(n=years_ocf)
+                is_ocf_increasing, ocf_data = cashflow.is_operative_cashflow_increasing(
+                    n=years_ocf
+                )
 
-                row_data_features = {'ticker': t}
+                row_data_features = {"ticker": t}
                 row_data_features.update(fcf_data)
                 row_data_features.update(ocf_data)
                 all_ticker_features.append(row_data_features)
 
                 row_data_scores = {
-                    'ticker': t,
+                    "ticker": t,
                     fmp_gv.increasing_fcf_condition: is_fcf_increasing,
-                    fmp_gv.increasing_ocf_condition: is_ocf_increasing, # Add OCF score
+                    fmp_gv.increasing_ocf_condition: is_ocf_increasing,  # Add OCF score
                 }
                 all_ticker_scores.append(row_data_scores)
 
@@ -166,6 +170,7 @@ class FmpDataCashFlow:
             df_scores = pd.DataFrame()
 
         return df_scores, df_features
+
 
 if __name__ == "__main__":
     cashflow = FmpDataCashFlow("TEST")

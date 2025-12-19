@@ -3,6 +3,7 @@ import yfinance as yf
 import src.yfinance.config_yahoo_finance as cyf
 import src.global_variables as gv
 
+
 class YahooFinanceTickerInfo:
     def __init__(self, ticker):
         self.ticker = ticker
@@ -62,7 +63,7 @@ class YahooFinanceTickerInfo:
         try:
             val = self.info.get(cyf.freeCashflow, 0)
             if isinstance(val, (int, float)):
-                return round(val, 0) # Round to nearest whole number
+                return round(val, 0)  # Round to nearest whole number
             return 0
         except Exception:
             return 0
@@ -75,7 +76,7 @@ class YahooFinanceTickerInfo:
         try:
             val = self.info.get(cyf.marketCap, 0)
             if isinstance(val, (int, float)):
-                return round(val, 0) # Round to nearest whole number
+                return round(val, 0)  # Round to nearest whole number
             return 0
         except Exception:
             return 0
@@ -101,10 +102,11 @@ class YahooFinanceTickerInfo:
         return {
             gv.P_E_RATIO: self.p_e_ratio,
             gv.INSIDER_OWNERSHIP: self.insider_ownership,
-         #   gv.FREE_CASHFLOW: self.free_cashflow,
+            #   gv.FREE_CASHFLOW: self.free_cashflow,
             gv.MARKET_CAP: self.market_cap,
-            gv.ENTERPRISE_TO_EBITDA: self.enterprise_to_ebitda
+            gv.ENTERPRISE_TO_EBITDA: self.enterprise_to_ebitda,
         }
+
 
 if __name__ == "__main__":
     all_metrics = YahooFinanceTickerInfo("CHTR").get_all_metrics()

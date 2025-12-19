@@ -6,7 +6,7 @@ MAIN_DIR = str(Path(__file__).resolve().parents[1])
 DATA_DIR = os.path.join(MAIN_DIR, "data")
 
 # FILES
-ALL_STOCKS_INFO_FILE= os.path.join(DATA_DIR, "finviz", "all_stocks_tickers.csv")
+ALL_STOCKS_INFO_FILE = os.path.join(DATA_DIR, "finviz", "all_stocks_tickers.csv")
 
 # PARAMETERS NAMES
 FCF_YEARS = "fcf_years"
