@@ -105,41 +105,38 @@ with tab1:
             if st.button("Select Whitelisted"):
                 selected_tickers = whitelisted_tickers
 
-        # --- Blacklist Section ---
+        # -------------------------
+
+    # --- Blacklist Section in Sidebar ---
+    with st.sidebar:
         if blacklist_data:
             st.markdown(
                 "<p style='font-size: 18px; color: #2ECC71;'>Tickers Blacklist</p>",
                 unsafe_allow_html=True,
             )
-            col_bl_info, col_bl_tickers, col_bl_action = st.columns([1, 1, 1])
-            with col_bl_info:
-                st.write(f"**Date:** {blacklist_data.get('date', 'N/A')}")
-                st.write(
-                    f"**Threshold:** {blacklist_data.get('threshold_score', 'N/A')}"
-                )
-            with col_bl_tickers:
-                st.write(f"**Nr. of Tickers:** {len(blacklisted_tickers)}")
+            st.write(f"**Date:** {blacklist_data.get('date', 'N/A')}")
+            st.write(f"**Threshold:** {blacklist_data.get('threshold_score', 'N/A')}")
+            st.write(f"**Nr. of Tickers:** {len(blacklisted_tickers)}")
 
-            with col_bl_action:
-                bl_threshold = st.number_input(
-                    "BL Threshold:",
-                    min_value=0,
-                    value=int(blacklist_data.get("threshold_score", 0)),
-                    key="bl_threshold_input",
-                )
-                if st.button("Update Blacklist"):
-                    with st.spinner("Updating Blacklist..."):
-                        df_scores_bl, df_features_bl = process_tickers(
-                            available_tickers, screener_parameters
-                        )
-                        save_tickers_blacklist(df_scores_bl, bl_threshold)
-                        # Reload blacklist data to update UI info
-                        blacklist_data = load_tickers_blacklist()
-                        blacklisted_tickers = blacklist_data.get("tickers", [])
-                        st.info(
-                            f"Blacklist updated! {len(blacklisted_tickers)} tickers placed in the new blacklist."
-                        )
-        # -------------------------
+            bl_threshold = st.number_input(
+                "BL Threshold:",
+                min_value=0,
+                value=int(blacklist_data.get("threshold_score", 0)),
+                key="bl_threshold_input",
+            )
+            if st.button("Update Blacklist"):
+                with st.spinner("Updating Blacklist..."):
+                    df_scores_bl, df_features_bl = process_tickers(
+                        available_tickers, screener_parameters
+                    )
+                    save_tickers_blacklist(df_scores_bl, bl_threshold)
+                    # Reload blacklist data to update UI info
+                    blacklist_data = load_tickers_blacklist()
+                    blacklisted_tickers = blacklist_data.get("tickers", [])
+                    st.info(
+                        f"Blacklist updated! {len(blacklisted_tickers)} tickers placed in the new blacklist."
+                    )
+    # ------------------------------------
 
     df_scores, df_features = process_tickers(selected_tickers, screener_parameters)
 
